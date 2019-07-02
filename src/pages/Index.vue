@@ -25,7 +25,7 @@
         </tr>
         </tbody>
     </table>
-</div> 
+</div>
   </div>
 </template>
 <script>
@@ -33,65 +33,77 @@ export default {
   name: 'app',
   data() {
     return {
-        cityList:[],
-        citySelected:'',
-        updateTime:'',
-        weather:'',
-        temperature:'',
-        wind:'',
-        es :Object
+      cityList:[],
+      citySelected:'',
+      updateTime:'',
+      weather:'',
+      temperature:'',
+      wind:'',
+      es :Object
     }
   },
   created() {
-   this.loadCity();
-   this.getWeatherInfo();
-   
+    this.loadCity();
   },
   mounted() {
   },
   methods: {
-      cityChange(){
-        this.es.close();
-        this.getWeatherInfo();
-      },
-      getWeatherInfo(){
-        var _this = this;
-        this.es =new EventSource('http://localhost:9090/forecast',{city:_this.citySelected});
-        this.es.addEventListener('message', function(e) {
-            let jsonstr = JSON.parse( e.data );
-            _this.updateTime = _this.timestampToTime(jsonstr.timestamp);
-            _this.weather = jsonstr.weather;
-            _this.temperature = jsonstr.temperature;
-            _this.wind = jsonstr.wind;
+
+    /**
+     * This will trigger fetch current weather of selected city.
+     */
+    cityChange(){
+      this.es.close()
+      this.getWeatherInfo();
+    },
+    getWeatherInfo(){
+      var that = this;
+
+      this.es =new EventSource(`${process.env.BACKEND_URL}/current/event?city=${that.citySelected}`);
+      this.es.addEventListener('message', (e) => {
+        let jsonstr = JSON.parse( e.data );
+
+        that.updateTime = that.timestampToTime(jsonstr.timestamp);
+        that.weather = jsonstr.weather;
+        that.temperature = jsonstr.temperature;
+        that.wind = jsonstr.wind;
+      })
+    },
+    /**
+       * Load supported cities and get the First city' weather.
+       */
+    loadCity(){
+      var that = this;
+
+      this.axios({
+        method: 'get',
+        url:`${process.env.BACKEND_URL}/city/list`
+      })
+        .then((response) => {
+          if (response.data.code===100){
+            that.cityList = response.data.data;
+            that.citySelected = response.data.data[0];
+          }
         })
-      },
-      loadCity(){
-        var _this = this;
-        this.axios({
-            method: 'get',
-            url: "http://localhost:9090/city/list"
+        .then(() => {
+          that.getWeatherInfo();
         })
-        .then(function(response){
-            if(response.data.code===100){
-                _this.cityList = response.data.data;
-                _this.citySelected = response.data.data[0];
-            }
-        })
-        .catch(function (error) {
-            console.log(error);
-        }); 
-      },
-      timestampToTime(timestamp) {
-        let date = new Date(timestamp);
-        let Y = date.getFullYear() + '-';
-        let M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-        let D = (date.getDate()+1 < 10 ? '0'+(date.getDate()+1) : date.getDate()+1) + ' ';
-        let h =(date.getHours()+1 < 10 ? '0'+(date.getHours()+1) : date.getHours()+1)+ ':';
-        let m =(date.getMinutes()+1 < 10 ? '0'+(date.getMinutes()+1) : date.getMinutes()+1)+ ':';
-        let s = (date.getSeconds()+1 < 10 ? '0'+(date.getSeconds()+1) : date.getSeconds()+1);
-        return Y+M+D+h+m+s;
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    timestampToTime(timestamp) {
+      let date = new Date(timestamp);
+      let Y = `${date.getFullYear()}-`;
+      let M = `${date.getMonth()+1 < 10 ? `0${date.getMonth()+1}` : date.getMonth()+1}-`;
+      let D = `${date.getDate()+1 < 10 ? `0${date.getDate()+1}` : date.getDate()+1} `;
+      let h =`${date.getHours()+1 < 10 ? `0${date.getHours()+1}` : date.getHours()+1}:`;
+      let m =`${date.getMinutes()+1 < 10 ? `0${date.getMinutes()+1}` : date.getMinutes()+1}:`;
+      let s = date.getSeconds()+1 < 10 ? `0${date.getSeconds()+1}` : date.getSeconds()+1;
+
+      return Y+M+D+h+m+s;
     }
-  }  
+  }
 }
 </script>
 <style scoped>
