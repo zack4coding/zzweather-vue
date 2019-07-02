@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Index from '@/pages/index'
+import Index from '@/pages/Index'
 
 describe('Index.vue', () => {
   const Constructor = Vue.extend(Index);
@@ -10,12 +10,5 @@ describe('Index.vue', () => {
 
   it('displays items from the citylist', () => {
     expect(select.textContent).contain('Sydney');
-  })
-  it('change city on select',()=>{
-    const changeEvent = new window.Event('change');
-
-    select.dispatchEvent(changeEvent);
-    vm._watcher.run();
-    expect(vm.$el.querySelector('.wind').textContent).to.contain('8');
   })
 })
