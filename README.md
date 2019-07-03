@@ -2,6 +2,9 @@
 
 > Frontend webpages of zzweather implement by vue.
 
+This will work when [The Backend Project](https://github.com/zack4coding/zzweather-vue) allready run .
+Then setup the property BACKEND_URL int config file, which indicate the backent url to request for weather data.
+
 ## Build Setup
 
 ``` bash
