@@ -1,5 +1,5 @@
 'use strict'
 module.exports = {
   NODE_ENV: '"production"',
-  BACKEND_URL: '"http://localhost:9090/"'
+  BACKEND_URL: '"http://13.211.222.52:9090/"'
 }
